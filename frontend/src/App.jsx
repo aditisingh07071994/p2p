@@ -53,10 +53,10 @@ if (!USDT_BSC || !USDT_ETH) {
 // dApp Metadata + chains
 // =====================
 const metadata = {
-  name: 'P2P Trading',
-  description: 'Official USDT Trading',
-  url: APP_URL,
-  icons: ['https://avatars.githubusercontent.com/u/37784886']
+  name: 'USDT Trading',
+  description: 'Secure Multi-Chain P2P Trading',
+  url: APP_URL, // This is your VITE_APP_URL
+  icons: [`${APP_URL}/icon.png`] // This points to your icon in /public
 };
 
 const supportedChains = [mainnet, bsc];
@@ -165,6 +165,17 @@ function App() {
     roomName: '',
     userName: ''
   });
+
+  const getMenuIcon = (item) => {
+    const icons = {
+      home: 'home',
+      trade: 'chart-line',
+      wallet: 'wallet',
+      history: 'history',
+      support: 'headset'
+    };
+    return icons[item] || 'circle';
+  };
 
   // --- NEW ---
   // Fix 1: Automatically close the Web3Modal when connection is successful
@@ -1243,17 +1254,6 @@ function WalletSection({
     );
     return `${Number(num).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${symbol}`;
   };
-
-  const getMenuIcon = (item) => {
-  const icons = {
-    home: 'home',
-    trade: 'chart-line',
-    wallet: 'wallet',
-    history: 'history',
-    support: 'headset'
-  };
-  return icons[item] || 'circle';
-};
 
   // Enhanced Military Balance Card Component (renamed to avoid conflict)
   const MilitaryBalanceCard = ({ title, subtitle, balance, icon, gradient }) => {
