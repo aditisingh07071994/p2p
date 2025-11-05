@@ -912,6 +912,18 @@ function TradeSection({
   // Safe defaults
   const safeAds = ads || [];
   const safeTraders = traders || [];
+  const [currentAd, setCurrentAd] = useState(0);
+
+    // Auto-rotate ads every 5 seconds
+  useEffect(() => {
+    if (safeAds.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentAd(prev => (prev + 1) % safeAds.length);
+    }, 3500);
+    
+    return () => clearInterval(interval);
+  }, [safeAds.length]);
 
   const handlePaymentSearchChange = (e) => {
         const query = e.target.value;
@@ -1092,17 +1104,18 @@ function TradeSection({
           </div>
         </div>
 
-        {/* NEW: Professional Sponsored Ads Section */}
-          {safeAds.length > 0 && (
-            <div className="mb-8 slide-in">
-              <h2 className="text-xl font-bold text-white mb-4 uppercase tracking-wider">Sponsored</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {safeAds.map((ad) => (
-                  <AdCard key={ad.id} ad={ad} />
-                ))}
-              </div>
+        {/* NEW: Rotating Sponsored Ads Carousel */}
+        {/* NEW: Rotating Sponsored Ads Carousel */}
+        {safeAds.length > 0 && (
+          <div className="mb-8 slide-in">
+            <h2 className="text-xl font-bold text-white mb-4 uppercase tracking-wider">Sponsored</h2>
+            <div className="relative">
+              {/* Single Ad Display */}
+              <AdCard ad={safeAds[currentAd]} />
             </div>
-          )}
+          </div>
+        )}
+
 
         {/* Tactical Trader Grid */}
         <div className="mb-8">
@@ -1502,8 +1515,14 @@ const PlaceholderSection = ({ title }) => (
 );
 
 // Trader Card
-// Trader Card
 function TraderCard({ trader, handleNetworkCheck, handleChatOpen, setTradeModal }) {
+    // Add this debug log
+  console.log('Trader data:', {
+    name: trader.name,
+    currencySymbol: trader.currencySymbol,
+    pricePerUsdt: trader.pricePerUsdt,
+    country: trader.country
+  });
   const handleTradeNowClick = () => {
     const ok = handleNetworkCheck(trader.network);
     if (ok) setTradeModal({ trader });
@@ -1546,6 +1565,7 @@ function TraderCard({ trader, handleNetworkCheck, handleChatOpen, setTradeModal 
 
       <div className="gradient-border p-3 md:p-4 mb-4 text-center">
         <div className="text-xl md:text-2xl font-bold text-white">
+          {/* This is the line that shows the symbol. It is correct. */}
           {trader.currencySymbol}{trader.pricePerUsdt.toFixed(2)}
         </div>
         <div className="text-blue-200 text-xs md:text-sm">per USDT</div>
@@ -2304,20 +2324,19 @@ function AdCard({ ad }) {
       href={ad.link}
       target="_blank"
       rel="noopener noreferrer sponsored"
-      className="glass-military p-4 rounded-2xl border border-purple-500/30 shadow-lg hover:shadow-purple-500/20 hover:border-purple-400 transition-all duration-300 flex space-x-4 relative overflow-hidden group"
+      className={`glass-military p-6 rounded-2xl border ${ad.bgColor ? `bg-gradient-to-r ${ad.bgColor}` : 'border-purple-500/30'} shadow-lg hover:shadow-purple-500/20 hover:border-purple-400 transition-all duration-300 flex space-x-4 relative overflow-hidden group w-full`}
     >
       {/* "Ad" Label */}
-      <span className="absolute top-2 right-2 bg-black/30 text-white/50 text-xs font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
-        Ad
+      <span className="absolute top-3 right-3 bg-black/40 text-white/70 text-xs font-bold px-2 py-1 rounded-full backdrop-blur-sm border border-white/20">
+        Sponsored
       </span>
       
       {/* Brand Logo */}
-      <div className="flex-shrink-0 w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center border border-white/10">
+      <div className="flex-shrink-0 w-20 h-20 bg-white/10 rounded-xl flex items-center justify-center border border-white/10">
         <img
           src={ad.image}
           alt={`${ad.title} logo`}
-          className="w-12 h-12 object-contain"
-          // Fallback in case image fails to load
+          className="w-16 h-16 object-contain"
           onError={(e) => {
             e.target.onerror = null; 
             e.target.src = 'https://placehold.co/64x64/334155/E2E8F0?text=Logo';
@@ -2327,13 +2346,13 @@ function AdCard({ ad }) {
 
       {/* Ad Content */}
       <div className="flex-1 min-w-0">
-        <h3 className="font-bold text-white text-lg truncate group-hover:text-cyan-400 transition-colors">
+        <h3 className="font-bold text-white text-xl truncate group-hover:text-cyan-400 transition-colors">
           {ad.title}
         </h3>
-        <p className="text-blue-200 text-sm mt-1 line-clamp-2">
+        <p className="text-blue-200 text-sm mt-2 leading-relaxed">
           {ad.description}
         </p>
-        <p className="text-cyan-400 text-xs font-medium mt-2 truncate">
+        <p className="text-cyan-400 text-xs font-medium mt-3 truncate">
           {getHostname(ad.link)}
         </p>
       </div>
