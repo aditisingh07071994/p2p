@@ -10,7 +10,7 @@ const adsData = [
     id: 1,
     title: 'Trade on Binance',
     description: 'The world\'s largest crypto exchange. Buy, sell, and trade hundreds of cryptocurrencies.',
-    image: 'https://cryptologos.cc/logos/binance-coin-bnb-logo.png',
+    image: '/ads/1.png',
     bgColor: 'from-yellow-400 to-yellow-500',
     link: 'https://www.binance.com/',
     active: true
@@ -19,7 +19,7 @@ const adsData = [
     id: 2,
     title: 'Get Started with Coinbase',
     description: 'The easiest and most trusted place to buy, sell, and manage your cryptocurrency.',
-    image: 'https://cryptologos.cc/logos/coinbase-coin-logo.png',
+    image: '/ads/2.svg',
     bgColor: 'from-blue-500 to-blue-600',
     link: 'https://www.coinbase.com/',
     active: true
@@ -28,7 +28,7 @@ const adsData = [
     id: 3,
     title: 'Secure Your Crypto with Ledger',
     description: 'The most popular hardware wallet. Keep your crypto safe from hackers and in your own control.',
-    image: 'https://logos-world.net/wp-content/uploads/2021/02/Ledger-Logo.png',
+    image: '/ads/3.svg',
     bgColor: 'from-gray-700 to-gray-800',
     link: 'https://www.ledger.com/',
     active: true
@@ -37,7 +37,7 @@ const adsData = [
     id: 4,
     title: 'Your Wallet for Web3',
     description: 'The world\'s leading self-custody wallet. Start exploring blockchain applications and DeFi.',
-    image: 'https://cryptologos.cc/logos/metamask-logo.png',
+    image: '/ads/4.svg',
     bgColor: 'from-orange-400 to-orange-500',
     link: 'https://metamask.io/',
     active: true
@@ -46,7 +46,7 @@ const adsData = [
     id: 5,
     title: 'Swap on Uniswap',
     description: 'The leading decentralized exchange. Swap, earn, and build on the Uniswap Protocol.',
-    image: 'https://cryptologos.cc/logos/uniswap-uni-logo.png',
+    image: '/ads/5.png',
     bgColor: 'from-pink-400 to-pink-500',
     link: 'https://uniswap.org/',
     active: true
@@ -55,7 +55,7 @@ const adsData = [
     id: 6,
     title: 'Chainlink Data Feeds',
     description: 'The industry-standard oracle network for powering hybrid smart contracts.',
-    image: 'https://cryptologos.cc/logos/chainlink-link-logo.png',
+    image: '/ads/6.png',
     bgColor: 'from-blue-600 to-blue-700',
     link: 'https://chain.link/',
     active: true
@@ -64,7 +64,7 @@ const adsData = [
     id: 7,
     title: 'Polygon: The Value Layer of the Internet',
     description: 'Fast, secure, and scalable Ethereum scaling solutions for Web3 builders.',
-    image: 'https://cryptologos.cc/logos/polygon-matic-logo.png',
+    image: '/ads/7.png',
     bgColor: 'from-purple-500 to-purple-600',
     link: 'https://polygon.technology/',
     active: true
@@ -73,7 +73,7 @@ const adsData = [
     id: 8,
     title: 'Build on Solana',
     description: 'Experience the high-performance blockchain for global-scale applications.',
-    image: 'https://cryptologos.cc/logos/solana-sol-logo.png',
+    image: '/ads/8.png',
     bgColor: 'from-green-400 to-purple-500',
     link: 'https://solana.com/',
     active: true
@@ -82,7 +82,7 @@ const adsData = [
     id: 9,
     title: 'Tether (USDT)',
     description: 'The original, most popular stablecoin, pegged 1:1 with the U.S. dollar.',
-    image: 'https://cryptologos.cc/logos/tether-usdt-logo.png',
+    image: '/ads/9.png',
     bgColor: 'from-green-400 to-green-500',
     link: 'https://tether.to/',
     active: true
@@ -91,7 +91,7 @@ const adsData = [
     id: 10,
     title: 'Kraken Pro',
     description: 'The secure and professional way to trade crypto. Low fees, deep liquidity.',
-    image: 'https://logos-world.net/wp-content/uploads/2021/02/Kraken-Logo.png',
+    image: '/ads/10.png',
     bgColor: 'from-indigo-500 to-indigo-600',
     link: 'https://www.kraken.com/',
     active: true

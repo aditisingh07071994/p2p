@@ -275,8 +275,15 @@ app.put('/api/settings', authMiddleware, async (req, res) => {
 
 // Get all traders (public)
 app.get('/api/traders', async (_req, res) => {
-  const list = await Trader.find().sort({ id: 1 }).lean();
-  res.json(list);
+  try {
+    const list = await Trader.find()
+      .select('id name avatar country currency currencySymbol pricePerUsdt totalTrades successRate rating reviews network paymentOptions limit online')
+      .sort({ id: 1 })
+      .lean();
+    res.json(list);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Get all ads (public)

@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 seedAdmin.js
+seeder.js
+trader_seeder.js
 
 # Editor directories and files
 .vscode/*
