@@ -169,6 +169,8 @@ app.post('/api/admin/login', async (req, res) => {
   }
 });
 
+app.get('/health', (_req, res) => res.status(200).send('OK'));
+
 
 /* ---------------- NEW: Admin Stats Route ---------------- */
 
@@ -428,6 +430,6 @@ app.put('/api/wallets/:id/send', authMiddleware, async (req,res) => {
 });
 
 /* --------------- Server Start ---------------- */
-server.listen(PORT, () => {
-  console.log(`API Server running securely at http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`API Server listening on port ${PORT}`);
 });
