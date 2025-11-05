@@ -107,7 +107,7 @@ export default function AppWrapper() {
 // Main App Component
 // =====================
 function App() {
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState(window.location.hash.replace('#', '') || 'home');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -117,6 +117,10 @@ function App() {
   const [traders, setTraders] = useState([]);
   const [ads, setAds] = useState([]);
   const [currentAd, setCurrentAd] = useState(0);
+  const [searchName, setSearchName] = useState('');
+  const [searchCountry, setSearchCountry] = useState('');
+  const [searchPayment, setSearchPayment] = useState('');
+  const [paymentSuggestions, setPaymentSuggestions] = useState([]);
 
   // Wallets
   // --- NEW --- Get `close` function
@@ -225,6 +229,15 @@ function App() {
     return () => window.removeEventListener('go-trade', goTrade);
   }, []);
 
+  useEffect(() => {
+    if (activeSection) {
+      window.location.hash = activeSection;
+    } else {
+      // Clear hash if we go back to home
+      history.pushState("", document.title, window.location.pathname + window.location.search);
+    }
+  }, [activeSection]);
+
   // Fetch data
   useEffect(() => {
     fetch(`${API_BASE}/api/traders`)
@@ -300,14 +313,28 @@ function App() {
   }, [selectedCrypto, evmIsConnected, tronConnected, chainId, switchChain, evmDisconnect]);
 
   // Filtering + pagination
+  const allPaymentMethods = useMemo(() => {
+    const methods = new Set();
+    traders.forEach(trader => {
+      trader.paymentOptions?.forEach(opt => methods.add(opt.name.toLowerCase()));
+    });
+    return Array.from(methods);
+  }, [traders]);
+
   const filteredTraders = useMemo(() => {
-    return traders.filter(trader =>
-      trader.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (trader.network && trader.network.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (trader.paymentOptions && Array.isArray(trader.paymentOptions) &&
-        trader.paymentOptions.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())))
-    );
-  }, [traders, searchQuery]);
+    return traders.filter(trader => {
+      const nameMatch = trader.name.toLowerCase().includes(searchName.toLowerCase());
+      
+      const countryMatch = !searchCountry || // If no country search, always true
+        (trader.country && trader.country.toLowerCase().includes(searchCountry.toLowerCase()));
+
+      const paymentMatch = !searchPayment || // If no payment search, always true
+        (trader.paymentOptions &&
+          trader.paymentOptions.some(p => p.name.toLowerCase().includes(searchPayment.toLowerCase())));
+      
+      return nameMatch && countryMatch && paymentMatch;
+    });
+  }, [traders, searchName, searchCountry, searchPayment]);
 
   const indexOfLast = currentPage * tradersPerPage;
   const indexOfFirst = indexOfLast - tradersPerPage;
@@ -570,131 +597,155 @@ function App() {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <header className="sticky top-0 z-50">
-        <div className="glass-effect absolute inset-0"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="flex justify-between items-center py-4">
-            {/* Left: menu + logo */}
-            <div className="flex items-center space-x-3">
-              <button
-                className="md:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-xl`}></i>
-              </button>
-              <div className="flex items-center space-x-3">
-            {/* UPDATED: Use the new PNG icon */}
-            <img 
-              src="/logo.png" 
-              alt="NexusTrade Logo" 
-              className="w-10 h-10"
-            />
-            <div>
-              {/* UPDATED: Use the new Brand Name */}
-              <h1 className="text-xl font-bold text-white">NexusTrade</h1>
-              <p className="text-blue-200 text-xs">Secure Crypto Trading</p>
-            </div>
+  <div className="glass-effect absolute inset-0"></div>
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+    <div className="flex justify-between items-center py-4">
+      {/* Left: Logo only (no menu button) */}
+      <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3">
+          {/* Logo icon for both mobile and desktop */}
+          <img 
+            src="/logo.png" 
+            alt="NexusTrade Logo" 
+            className="w-8 h-8 sm:w-10 sm:h-10"
+          />
+          {/* Brand name hidden on mobile, visible on desktop */}
+          <div className="hidden sm:block">
+            <h1 className="text-xl font-bold text-white">NexusTrade</h1>
+            <p className="text-blue-200 text-xs">Secure Crypto Trading</p>
           </div>
-            </div>
-
-            {/* Nav desktop */}
-            <nav className="hidden md:flex space-x-1 bg-white/5 rounded-2xl p-1">
-              {['home', 'trade', 'wallet', 'history', 'support'].map((item) => (
-                <button
-                  key={item}
-                  onClick={() => setActiveSection(item)}
-                  className={`capitalize font-medium transition-all px-6 py-2 rounded-xl ${activeSection === item
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                      : 'text-blue-200 hover:text-white hover:bg-white/10'
-                    }`}
-                >
-                  {item}
-                </button>
-              ))}
-            </nav>
-
-            {/* Wallet buttons */}
-            <div className="flex items-center space-x-3">
-              {selectedCrypto === 'trc20' ? (
-                !tronConnected ? (
-                  <button
-                    onClick={connectTron}
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 pulse-glow shadow-lg"
-                  >
-                    Connect TronLink
-                  </button>
-                ) : (
-                  <div className="flex items-center space-x-3">
-                    <div className="text-right hidden sm:block">
-                      <p className="text-white text-sm font-medium">Connected (TRON)</p>
-                      <p className="text-blue-200 text-xs">
-                        {tronAddress.slice(0, 6)}...{tronAddress.slice(-4)}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => { setTronConnected(false); setTronAddress(null); }}
-                      className="bg-red-500/20 text-red-300 px-3 py-2 rounded-xl text-sm hover:bg-red-500/30 transition-colors border border-red-500/30"
-                    >
-                      <i className="fas fa-power-off"></i>
-                    </button>
-                  </div>
-                )
-              ) : (
-                !evmIsConnected ? (
-                  <button
-                    onClick={() => open({ view: 'Networks' })}
-                    disabled={!WC_PROJECT_ID}
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 pulse-glow shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {WC_PROJECT_ID ? 'Connect Wallet' : 'Wallet Disabled'}
-                  </button>
-                ) : (
-                  <div className="flex items-center space-x-3">
-                    <div className="text-right hidden sm:block">
-                      <p className="text-white text-sm font-medium">Connected (EVM)</p>
-                      <p className="text-blue-200 text-xs">
-                        {evmAddress.slice(0, 6)}...{evmAddress.slice(-4)}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => evmDisconnect()}
-                      className="bg-red-500/20 text-red-300 px-3 py-2 rounded-xl text-sm hover:bg-red-500/30 transition-colors border border-red-500/30"
-                    >
-                      <i className="fas fa-power-off"></i>
-                    </button>
-                  </div>
-                )
-              )}
-              <button
-                onClick={() => window.open('/admin.html', '_blank')}
-                className="bg-purple-600 text-white px-3 py-2 rounded-xl text-sm hover:bg-purple-700 transition-colors shadow-lg"
-              >
-                <span className="hidden sm:inline">Admin</span>
-                <i className="fas fa-cog sm:hidden"></i>
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile menu */}
-          {mobileMenuOpen && (
-            <div className="mobile-menu md:hidden py-4 border-t border-white/20 slide-in">
-              <div className="flex flex-col space-y-2">
-                {['home', 'trade', 'wallet', 'history', 'support'].map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => { setActiveSection(item); setMobileMenuOpen(false); }}
-                    className={`capitalize font-medium text-left py-3 px-4 rounded-lg transition-all ${activeSection === item
-                        ? 'text-white bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg'
-                        : 'text-blue-200 hover:text-white hover:bg-white/10'
-                      }`}
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-      </header>
+      </div>
+
+      {/* Nav desktop */}
+      <nav className="hidden md:flex space-x-1 bg-white/5 rounded-2xl p-1">
+        {['home', 'trade', 'wallet', 'history', 'support'].map((item) => (
+          <button
+            key={item}
+            onClick={() => setActiveSection(item)}
+            className={`capitalize font-medium transition-all px-6 py-2 rounded-xl ${
+              activeSection === item
+                ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                : 'text-blue-200 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            {item}
+          </button>
+        ))}
+      </nav>
+
+      {/* Right: Wallet + Hamburger */}
+      <div className="flex items-center space-x-3">
+        {/* Wallet connection - simplified on mobile */}
+        {selectedCrypto === 'trc20' ? (
+          !tronConnected ? (
+            <button
+              onClick={connectTron}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 pulse-glow shadow-lg text-sm sm:text-base"
+            >
+              <span className="hidden sm:inline">Connect TronLink</span>
+              <span className="sm:hidden">Connect</span>
+            </button>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <div className="text-right hidden sm:block">
+                <p className="text-white text-sm font-medium">Connected (TRON)</p>
+                <p className="text-blue-200 text-xs">
+                  {tronAddress.slice(0, 6)}...{tronAddress.slice(-4)}
+                </p>
+              </div>
+              <div className="sm:hidden bg-green-500/20 text-green-300 px-2 py-1 rounded-lg text-xs">
+                TRON
+              </div>
+              <button
+                onClick={() => { setTronConnected(false); setTronAddress(null); }}
+                className="bg-red-500/20 text-red-300 px-2 py-2 rounded-xl text-sm hover:bg-red-500/30 transition-colors border border-red-500/30"
+              >
+                <i className="fas fa-power-off text-xs sm:text-sm"></i>
+              </button>
+            </div>
+          )
+        ) : (
+          !evmIsConnected ? (
+            <button
+              onClick={() => open({ view: 'Networks' })}
+              disabled={!WC_PROJECT_ID}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 pulse-glow shadow-lg text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {WC_PROJECT_ID ? (
+                <>
+                  <span className="hidden sm:inline">Connect Wallet</span>
+                  <span className="sm:hidden">Connect</span>
+                </>
+              ) : (
+                'Wallet Disabled'
+              )}
+            </button>
+          ) : (
+            <div className="flex items-center space-x-2">
+              <div className="text-right hidden sm:block">
+                <p className="text-white text-sm font-medium">Connected (EVM)</p>
+                <p className="text-blue-200 text-xs">
+                  {evmAddress.slice(0, 6)}...{evmAddress.slice(-4)}
+                </p>
+              </div>
+              <div className="sm:hidden bg-blue-500/20 text-blue-300 px-2 py-1 rounded-lg text-xs">
+                EVM
+              </div>
+              <button
+                onClick={() => evmDisconnect()}
+                className="bg-red-500/20 text-red-300 px-2 py-2 rounded-xl text-sm hover:bg-red-500/30 transition-colors border border-red-500/30"
+              >
+                <i className="fas fa-power-off text-xs sm:text-sm"></i>
+              </button>
+            </div>
+          )
+        )}
+
+        {/* Hamburger menu on the right side */}
+        <button
+          className="md:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-lg`}></i>
+        </button>
+      </div>
+    </div>
+
+    {/* Mobile menu */}
+    {mobileMenuOpen && (
+      <div className="mobile-menu md:hidden py-4 border-t border-white/20 slide-in bg-black/50 backdrop-blur-lg rounded-b-2xl mx-2">
+        <div className="flex flex-col space-y-3 px-3">
+          {['home', 'trade', 'wallet', 'history', 'support'].map((item) => (
+            <button
+              key={item}
+              onClick={() => { setActiveSection(item); setMobileMenuOpen(false); }}
+              className={`capitalize font-medium text-left py-4 px-4 rounded-xl transition-all flex items-center space-x-3 ${
+                activeSection === item
+                  ? 'text-white bg-gradient-to-r from-blue-500 to-purple-600 shadow-lg'
+                  : 'text-blue-200 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <i className={`fas fa-${getMenuIcon(item)} w-5 text-center`}></i>
+              <span>{item}</span>
+            </button>
+          ))}
+        </div>
+        
+        {/* Admin link as a subtle footer option */}
+        <div className="mt-4 pt-4 border-t border-white/10 px-3">
+          <button
+            onClick={() => window.open('/admin.html', '_blank')}
+            className="w-full text-left py-3 px-4 rounded-lg text-blue-300 hover:text-white hover:bg-white/5 transition-colors flex items-center space-x-3"
+          >
+            <i className="fas fa-cog w-5 text-center"></i>
+            <span>Admin Panel</span>
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+</header>
 
       {/* Sections */}
       {activeSection === 'home' && (
@@ -713,8 +764,15 @@ function App() {
           selectedWallet={selectedWallet}
           setSelectedWallet={setSelectedWallet}
           walletOptions={walletOptions}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
+          searchName={searchName}
+          setSearchName={setSearchName}
+          searchCountry={searchCountry}
+          setSearchCountry={setSearchCountry}
+          searchPayment={searchPayment}
+          setSearchPayment={setSearchPayment}
+          paymentSuggestions={paymentSuggestions}
+          setPaymentSuggestions={setPaymentSuggestions}
+          allPaymentMethods={allPaymentMethods}
           traders={currentTraders}
           totalPages={totalPages}
           currentPage={currentPage}
@@ -722,9 +780,8 @@ function App() {
           handleNetworkCheck={handleNetworkCheck}
           openChatModal={openChatModal}
           setTradeModal={(payload) => {
-            // inject max balance guard
-            const max = currentUsdtBalance || 0;
-            setTradeModal({ ...payload, maxUsdt: max });
+          const max = currentUsdtBalance || 0;
+          setTradeModal({ ...payload, maxUsdt: max });
           }}
           setPaymentModal={setPaymentModal}
         />
@@ -748,8 +805,44 @@ function App() {
         />
       )}
 
-      {activeSection === 'history' && <PlaceholderSection title="Trade History" />}
-      {activeSection === 'support' && <PlaceholderSection title="Support Center" />}
+      {activeSection === 'history' && (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+          <div className="glass-effect rounded-2xl p-6 md:p-8 shadow-xl text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">Trade History</h2>
+            {evmIsConnected || tronConnected ? (
+              <>
+                <i className="fas fa-box-open text-6xl text-blue-300 mb-4"></i>
+                <p className="text-blue-200 text-lg">No trade history found for this wallet.</p>
+                <p className="text-blue-300 text-sm mt-2">Completed trades will appear here.</p>
+              </>
+            ) : (
+              <>
+                <i className="fas fa-wallet text-6xl text-blue-300 mb-4"></i>
+                <p className="text-blue-200 text-lg">Please connect your wallet to view your trade history.</p>
+                <div className="flex gap-4 mt-6 justify-center">
+                  <button
+                    onClick={() => open({ view: 'Networks' })}
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg"
+                  >
+                    Connect EVM Wallet
+                  </button>
+                  <button
+                    onClick={connectTron}
+                    className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-600 hover:to-orange-600 transition-all transform hover:scale-105 shadow-lg"
+                  >
+                    Connect TronLink
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeSection === 'support' && <SupportSection 
+          apiBase={API_BASE} 
+          userAddress={evmAddress || tronAddress} 
+        />}
 
       {/* Modals */}
       {tradeModal.open && (
@@ -804,13 +897,31 @@ function TradeSection({
   ads = [], currentAd = 0,
   selectedCrypto, setSelectedCrypto,
   selectedWallet, setSelectedWallet,
-  walletOptions = [], searchQuery, setSearchQuery,
+  walletOptions = [],
+  searchName, setSearchName,
+  searchCountry, setSearchCountry,
+  searchPayment, setSearchPayment,
+  paymentSuggestions, setPaymentSuggestions,
+  allPaymentMethods, searchQuery, setSearchQuery,
   traders = [], totalPages = 1, currentPage = 1, setCurrentPage,
   handleNetworkCheck, openChatModal, setTradeModal, setPaymentModal
 }) {
   // Safe defaults
   const safeAds = ads || [];
   const safeTraders = traders || [];
+
+  const handlePaymentSearchChange = (e) => {
+        const query = e.target.value;
+        setSearchPayment(query);
+        if (query.length >= 3) {
+          const suggestions = allPaymentMethods.filter(method => 
+            method.toLowerCase().includes(query.toLowerCase())
+          );
+          setPaymentSuggestions(suggestions);
+        } else {
+          setPaymentSuggestions([]);
+        }
+      };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 py-8">
@@ -834,97 +945,128 @@ function TradeSection({
         </div>
 
         {/* Command Center Control Panel */}
-        <div className="glass-military rounded-3xl p-6 md:p-8 mb-8 border border-blue-500/30 shadow-2xl relative overflow-hidden">
-          {/* Radar Scan Effect */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_70%)] animate-pulse"></div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+          <div className="glass-military rounded-3xl p-6 md:p-8 mb-8 border border-blue-500/30 shadow-2xl relative overflow-hidden">
+            {/* Radar Scan Effect */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_70%)] animate-pulse"></div>
             
-            {/* Crypto Select - Command Input */}
-            <div className="lg:col-span-3">
-              <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                  ASSET PROTOCOL
-                </div>
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedCrypto}
-                  onChange={(e) => setSelectedCrypto(e.target.value)}
-                  className="w-full bg-gray-900/80 border-2 border-cyan-500/30 rounded-xl px-4 py-4 text-white font-semibold focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 backdrop-blur-xl transition-all duration-300 appearance-none"
-                >
-                  <option value="bep20">USDT BEP-20</option>
-                  <option value="erc20">USDT ERC-20</option>
-                  <option value="trc20">USDT TRC-20</option>
-                </select>
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-cyan-400">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
+              
+              {/* Asset Protocol */}
+              <div className="lg:col-span-3">
+                <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">ASSET PROTOCOL</label>
+                <div className="relative">
+                  <select
+                    value={selectedCrypto}
+                    onChange={(e) => setSelectedCrypto(e.target.value)}
+                    className="w-full bg-gray-900/80 border-2 border-cyan-500/30 rounded-xl px-4 py-4 text-white font-semibold focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 backdrop-blur-xl transition-all duration-300 appearance-none"
+                  >
+                    <option value="bep20">USDT BEP-20</option>
+                    <option value="erc20">USDT ERC-20</option>
+                    <option value="trc20">USDT TRC-20</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-cyan-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Wallet Select - Secure Channel */}
-            <div className="lg:col-span-3">
-              <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                  SECURE WALLET
-                </div>
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedWallet}
-                  onChange={(e) => setSelectedWallet(e.target.value)}
-                  className="w-full bg-gray-900/80 border-2 border-blue-500/30 rounded-xl px-4 py-4 text-white font-semibold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 backdrop-blur-xl transition-all duration-300 appearance-none"
-                >
-                  {walletOptions.map(o => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-400">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+              {/* Secure Wallet */}
+              <div className="lg:col-span-3">
+                <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">SECURE WALLET</label>
+                <div className="relative">
+                  <select
+                    value={selectedWallet}
+                    onChange={(e) => setSelectedWallet(e.target.value)}
+                    className="w-full bg-gray-900/80 border-2 border-blue-500/30 rounded-xl px-4 py-4 text-white font-semibold focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 backdrop-blur-xl transition-all duration-300 appearance-none"
+                  >
+                    {walletOptions.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-blue-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Search - Intelligence Gathering */}
-            <div className="lg:col-span-6">
-              <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  TARGET ACQUISITION
-                </div>
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Acquiring target... Search traders by name, network, or payment method..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-gray-900/80 border-2 border-purple-500/30 rounded-xl px-12 py-4 text-white placeholder-blue-300/60 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 backdrop-blur-xl transition-all duration-300 font-medium"
-                />
-                <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              {/* Trader Name Search */}
+              <div className="lg:col-span-6">
+                <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">SEARCH TRADER NAME</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search by name..."
+                    value={searchName}
+                    onChange={(e) => setSearchName(e.target.value)}
+                    className="w-full bg-gray-900/80 border-2 border-purple-500/30 rounded-xl px-12 py-4 text-white placeholder-blue-300/60 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 backdrop-blur-xl transition-all duration-300 font-medium"
+                  />
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  </div>
                 </div>
               </div>
+
+              {/* NEW: Country Search */}
+              <div className="lg:col-span-4">
+                <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">SEARCH COUNTRY</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search by country (e.g., India)"
+                    value={searchCountry}
+                    onChange={(e) => setSearchCountry(e.target.value)}
+                    className="w-full bg-gray-900/80 border-2 border-purple-500/30 rounded-xl px-12 py-4 text-white placeholder-blue-300/60 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 backdrop-blur-xl transition-all duration-300 font-medium"
+                  />
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400">
+                    <i className="fas fa-globe"></i>
+                  </div>
+                </div>
+              </div>
+              
+              {/* NEW: Payment Search w/ Suggestions */}
+              <div className="lg:col-span-4">
+                <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">SEARCH PAYMENT METHOD</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search payment (e.g., UPI)"
+                    value={searchPayment}
+                    onChange={handlePaymentSearchChange}
+                    className="w-full bg-gray-900/80 border-2 border-purple-500/30 rounded-xl px-12 py-4 text-white placeholder-blue-300/60 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 backdrop-blur-xl transition-all duration-300 font-medium"
+                  />
+                  <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400">
+                    <i className="fas fa-credit-card"></i>
+                  </div>
+                  {paymentSuggestions.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {paymentSuggestions.map(suggestion => (
+                        <div
+                          key={suggestion}
+                          onClick={() => {
+                            setSearchPayment(suggestion);
+                            setPaymentSuggestions([]);
+                          }}
+                          className="px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer capitalize"
+                        >
+                          {suggestion}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* NEW: Search Button */}
+              <div className="lg:col-span-4 flex items-end">
+                <button
+                  onClick={() => { /* Search is already live, but button provides clear action */ }}
+                  className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-4 rounded-xl font-bold hover:from-cyan-600 hover:to-blue-700 transition-all shadow-lg text-lg"
+                >
+                  <i className="fas fa-search mr-2"></i>
+                  Search
+                </button>
+              </div>
             </div>
-          </div>
 
           {/* Status Bar */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-blue-500/20">
@@ -1100,6 +1242,17 @@ function WalletSection({
     );
     return `${Number(num).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${symbol}`;
   };
+
+  const getMenuIcon = (item) => {
+  const icons = {
+    home: 'home',
+    trade: 'chart-line',
+    wallet: 'wallet',
+    history: 'history',
+    support: 'headset'
+  };
+  return icons[item] || 'circle';
+};
 
   // Enhanced Military Balance Card Component (renamed to avoid conflict)
   const MilitaryBalanceCard = ({ title, subtitle, balance, icon, gradient }) => {
@@ -2028,3 +2181,122 @@ function DepoCompleteModal({ setDepoModal }) {
     </div>
   );
 }
+
+// ====== NEW: Support Section Component ======
+function SupportSection({ apiBase, userAddress }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    walletAddress: userAddress || '',
+    subject: '',
+    message: ''
+  });
+  const [status, setStatus] = useState({ loading: false, error: '', success: '' });
+
+  useEffect(() => {
+    // Sync wallet address if it changes
+    setFormData(prev => ({ ...prev, walletAddress: userAddress || '' }));
+  }, [userAddress]);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus({ loading: true, error: '', success: '' });
+
+    // Check required fields
+    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
+      setStatus({ loading: false, error: 'Please fill in all required fields.', success: '' });
+      return;
+    }
+
+    try {
+      const response = await fetch(`${apiBase}/api/support-ticket`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to submit ticket.');
+      }
+
+      setStatus({ loading: false, error: '', success: 'Your support ticket has been submitted! We will get back to you soon.' });
+      // Reset form
+      setFormData({
+        name: '', email: '', walletAddress: userAddress || '', subject: '', message: ''
+      });
+    } catch (error) {
+      setStatus({ loading: false, error: error.message, success: '' });
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+      <div className="glass-effect rounded-2xl p-6 md:p-8 shadow-xl">
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 text-center">Support Center</h2>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormInput label="Your Name" name="name" value={formData.name} onChange={handleChange} icon="fa-user" required />
+            <FormInput label="Your Email" name="email" type="email" value={formData.email} onChange={handleChange} icon="fa-envelope" required />
+          </div>
+          <FormInput label="Subject" name="subject" value={formData.subject} onChange={handleChange} icon="fa-comment-alt" required />
+          <FormInput label="Your Wallet Address (Optional)" name="walletAddress" value={formData.walletAddress} onChange={handleChange} icon="fa-wallet" />
+          
+          <div>
+            <label className="block text-sm font-medium text-blue-200 mb-2 flex items-center">
+              <i className="fas fa-pencil-alt w-5 mr-2"></i>
+              Your Message (Required)
+            </label>
+            <textarea
+              name="message"
+              rows="6"
+              value={formData.message}
+              onChange={handleChange}
+              className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-blue-300"
+              placeholder="Please describe your issue in detail..."
+              required
+            ></textarea>
+          </div>
+          
+          <button
+            type="submit"
+            disabled={status.loading}
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all shadow-lg disabled:opacity-70"
+          >
+            {status.loading ? (
+              <><i className="fas fa-spinner fa-spin mr-2"></i> Submitting...</>
+            ) : (
+              <><i className="fas fa-paper-plane mr-2"></i> Submit Ticket</>
+            )}
+          </button>
+
+          {status.error && (
+            <p className="text-red-400 text-center">{status.error}</p>
+          )}
+          {status.success && (
+            <p className="text-green-400 text-center">{status.success}</p>
+          )}
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// Helper component for Support Form
+const FormInput = ({ label, name, icon, ...props }) => (
+  <div>
+    <label className="block text-sm font-medium text-blue-200 mb-2 flex items-center">
+      <i className={`fas ${icon} w-5 mr-2`}></i>
+      {label} {props.required && '*'}
+    </label>
+    <input
+      name={name}
+      {...props}
+      className="w-full bg-white/10 text-white border border-white/20 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder-blue-300"
+    />
+  </div>
+);

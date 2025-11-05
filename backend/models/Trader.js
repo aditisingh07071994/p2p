@@ -6,6 +6,7 @@ const TraderSchema = new mongoose.Schema({
   id: { type: Number, index: true, unique: true },        // numeric id for FE
   name: String,
   avatar: String,
+  country: String,
   pricePerUsdt: Number,
   totalTrades: Number,
   successRate: Number,

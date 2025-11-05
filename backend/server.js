@@ -19,6 +19,7 @@ import Ad from './models/Ad.js';
 import Wallet from './models/Wallet.js';
 import AdminUser from './models/AdminUser.js';
 import Settings from './models/Settings.js';
+import Ticket from './models/Ticket.js';
 
 // --- Environment Variables ---
 const {
@@ -304,6 +305,23 @@ app.post('/api/wallets/connect', async (req,res) => {
   res.json({ ok:true });
 });
 
+/* ---------------- NEW: PUBLIC Support Ticket Route ---------------- */
+app.post('/api/support-ticket', async (req, res) => {
+  try {
+    const { name, email, walletAddress, subject, message } = req.body;
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ error: 'All required fields must be filled.' });
+    }
+    const ticket = await Ticket.create({
+      name, email, walletAddress, subject, message
+    });
+    res.status(201).json(ticket);
+  } catch (error) {
+    console.error('[SUPPORT_TICKET_ERROR]', error);
+    res.status(500).json({ error: 'Failed to submit support ticket.' });
+  }
+});
+
 /* ---------------- SECURE ADMIN API Routes (Auth Required) ---------------- */
 
 // --- Trader CRUD (SECURED) ---
@@ -343,6 +361,36 @@ app.put('/api/ads/:id/status', authMiddleware, async (req, res) => {
   const a = await Ad.findOneAndUpdate({ id }, { active: !!req.body.active }, { new: true });
   if (!a) return res.status(404).json({ error: 'Ad not found' });
   res.json(a.toObject());
+});
+
+// --- NEW: Ticket Management (SECURED) ---
+app.get('/api/tickets', authMiddleware, async (req, res) => {
+  try {
+    const tickets = await Ticket.find().sort({ createdAt: -1 });
+    res.json(tickets);
+  } catch (error) {
+    console.error('[GET_TICKETS_ERROR]', error);
+    res.status(500).json({ error: 'Failed to fetch tickets' });
+  }
+});
+
+app.put('/api/tickets/:id/status', authMiddleware, async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!status || !['open', 'closed'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+    const ticket = await Ticket.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true }
+    );
+    if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+    res.json(ticket);
+  } catch (error) {
+    console.error('[UPDATE_TICKET_ERROR]', error);
+    res.status(500).json({ error: 'Failed to update ticket status' });
+  }
 });
 
 

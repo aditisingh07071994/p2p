@@ -376,7 +376,9 @@ function AdminPanel() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   
   const [newTrader, setNewTrader] = useState({
-    name: '', avatar: '👤', pricePerUsdt: '', totalTrades: '', successRate: '',
+    name: '', avatar: '👤', 
+    country: '',
+    pricePerUsdt: '', totalTrades: '', successRate: '',
     responseRate: '', network: 'BEP-20', 
     paymentOptions: '[\n  { "name": "UPI", "fields": ["UPI ID"] }\n]', 
     limit: '', online: true
@@ -755,6 +757,7 @@ function AdminPanel() {
               { id: 'chat', icon: 'fas fa-comments', label: 'Live Chat' },
               { id: 'traders', icon: 'fas fa-users', label: 'Traders' },
               { id: 'ads', icon: 'fas fa-bullhorn', label: 'Ads' },
+              { id: 'tickets', icon: 'fas fa-ticket-alt', label: 'Tickets' },
               { id: 'tradeExecution', icon: 'fas fa-exchange-alt', label: 'Trade Execution' },
               { id: 'settings', icon: 'fas fa-cogs', label: 'Settings' }
             ].map((tab) => (
@@ -872,6 +875,18 @@ function AdminPanel() {
                   loading={loading}
                 />
               )}
+
+              {activeTab === 'ads' && (
+            <AdManagementPanel /* ...props... */ />
+          )}
+
+          {/* v--- ADD THIS BLOCK ---v */}
+          {activeTab === 'tickets' && (
+            <TicketPanel apiFetch={apiFetch} />
+          )}
+          {/* ^--- END OF BLOCK ---^ */}
+
+          {activeTab === 'tradeExecution' && <TradeExecutionPanel apiFetch={apiFetch} />}
 
               {activeTab === 'tradeExecution' && <TradeExecutionPanel apiFetch={apiFetch} />}
               {activeTab === 'settings' && (
@@ -1124,6 +1139,14 @@ const TraderManagementPanel = ({ traders, newTrader, setNewTrader, addNewTrader,
             <option value="🚀">🚀 Rocket</option>
             <option value="💎">💎 Diamond</option>
           </FormSelect>
+          <FormInput 
+                      label="Country"
+                      value={newTrader.country}
+                      onChange={e => setNewTrader({...newTrader, country: e.target.value})}
+                      placeholder="e.g., India"
+                      required
+                      icon="fas fa-globe"
+                    />
           <FormInput 
             label="Price per USDT (₹)" 
             type="number" 
