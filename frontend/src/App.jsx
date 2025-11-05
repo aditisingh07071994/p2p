@@ -1502,13 +1502,15 @@ const PlaceholderSection = ({ title }) => (
 );
 
 // Trader Card
+// Trader Card
 function TraderCard({ trader, handleNetworkCheck, handleChatOpen, setTradeModal }) {
   const handleTradeNowClick = () => {
     const ok = handleNetworkCheck(trader.network);
     if (ok) setTradeModal({ trader });
   };
   return (
-    <div className="trader-card glass-effect rounded-2xl p-4 md:p-6 hover:bg-white/20 transition-all duration-300 shadow-lg">
+    // Added h-full flex flex-col for consistent card height
+    <div className="trader-card glass-effect rounded-2xl p-4 md:p-6 hover:bg-white/20 transition-all duration-300 shadow-lg h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-lg md:text-xl shadow-lg">
@@ -1549,6 +1551,7 @@ function TraderCard({ trader, handleNetworkCheck, handleChatOpen, setTradeModal 
         <div className="text-blue-200 text-xs md:text-sm">per USDT</div>
       </div>
 
+      {/* === THIS IS THE CORRECTED LAYOUT BLOCK === */}
       <div className="grid grid-cols-2 gap-2 mb-4">
         <div>
           <div className="text-blue-200 text-xs md:text-sm mb-1">Country:</div>
@@ -1559,12 +1562,16 @@ function TraderCard({ trader, handleNetworkCheck, handleChatOpen, setTradeModal 
             </span>
           </div>
         </div>
-      <div className="mb-4">
-        <div className="text-blue-200 text-xs md:text-sm mb-2">Network:</div>
-        <div className="flex flex-wrap gap-1">
-          <span className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded-lg text-xs backdrop-blur-sm">{trader.network}</span>
+        <div>
+          <div className="text-blue-200 text-xs md:text-sm mb-1">Network:</div>
+          <div className="flex flex-wrap gap-1">
+            <span className="bg-blue-500/20 text-blue-300 px-2 py-1 rounded-lg text-xs backdrop-blur-sm">
+              {trader.network}
+            </span>
+          </div>
         </div>
       </div>
+      {/* === END OF CORRECTED BLOCK === */}
 
       <div className="mb-4">
         <div className="text-blue-200 text-xs md:text-sm mb-2">Payment Methods:</div>
@@ -1580,8 +1587,8 @@ function TraderCard({ trader, handleNetworkCheck, handleChatOpen, setTradeModal 
           )}
         </div>
       </div>
-      </div>
 
+      {/* This mt-auto pushes the buttons to the bottom */}
       <div className="flex space-x-2 mt-auto">
         <button
           onClick={handleTradeNowClick}
