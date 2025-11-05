@@ -1,0 +1,655 @@
+{
+  "traders": [
+    {
+      "id": 1,
+      "name": "CryptoKing",
+      "avatar": "👑",
+      "totalTrades": 1250,
+      "successRate": 98.7,
+      "pricePerUsdt": 104.5,
+      "responseRate": "2-5 min",
+      "network": "BEP-20",
+      "reviews": 45,
+      "rating": 4.9,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        }
+      ],
+      "limit": "₹1,000 - ₹50,000"
+    },
+    {
+      "id": 2,
+      "name": "TRONMaster",
+      "avatar": "⚡",
+      "totalTrades": 890,
+      "successRate": 99.2,
+      "pricePerUsdt": 103.8,
+      "responseRate": "1-3 min",
+      "network": "TRC-20",
+      "reviews": 32,
+      "rating": 4.8,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID", "Registered Name"]
+        }
+      ],
+      "limit": "₹500 - ₹25,000"
+    },
+    {
+      "id": 3,
+      "name": "EthTrader",
+      "avatar": "🛡️",
+      "totalTrades": 2100,
+      "successRate": 99.5,
+      "pricePerUsdt": 105.2,
+      "responseRate": "5-10 min",
+      "network": "ERC-20",
+      "reviews": 67,
+      "rating": 4.9,
+      "online": false,
+      "paymentOptions": [
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        }
+      ],
+      "limit": "₹2,000 - ₹1,00,000"
+    },
+    {
+      "id": 4,
+      "name": "John",
+      "avatar": "🚀",
+      "pricePerUsdt": 102.1,
+      "totalTrades": 9999,
+      "successRate": 99.99,
+      "responseRate": "1-2 min",
+      "network": "BEP-20",
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Bank Transfer",
+          "fields": ["Account Holder Name", "Account No.", "IFSC Code", "Branch Name"]
+        }
+      ],
+      "limit": "₹100 - ₹985",
+      "online": true,
+      "rating": 4.5,
+      "reviews": 0
+    },
+    {
+      "id": 5,
+      "name": "Ishu",
+      "avatar": "⚡",
+      "pricePerUsdt": 100.7,
+      "totalTrades": 6547,
+      "successRate": 99.56,
+      "responseRate": "2-3 min",
+      "network": "BEP-20",
+      "paymentOptions": [
+        {
+          "name": "Google Pay",
+          "fields": ["Registered Phone Number or Email"]
+        },
+        {
+          "name": "Bank Transfer (ACH/Wire)",
+          "fields": ["Bank Name", "Account Number", "Routing Number", "Account Holder Name"]
+        },
+        {
+          "name": "Wise",
+          "fields": ["Email Address or Account Number"]
+        }
+      ],
+      "limit": "₹100 - ₹9,000",
+      "online": true,
+      "rating": 4.5,
+      "reviews": 0
+    },
+    {
+      "id": 6,
+      "name": "BitGuru",
+      "avatar": "🧙‍♂️",
+      "pricePerUsdt": 101.3,
+      "totalTrades": 3200,
+      "successRate": 98.9,
+      "responseRate": "2-4 min",
+      "network": "TRC-20",
+      "reviews": 54,
+      "rating": 4.8,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        }
+      ],
+      "limit": "₹500 - ₹45,000"
+    },
+    {
+      "id": 7,
+      "name": "CoinWhale",
+      "avatar": "🐋",
+      "pricePerUsdt": 104.2,
+      "totalTrades": 8700,
+      "successRate": 99.4,
+      "responseRate": "1-3 min",
+      "network": "ERC-20",
+      "reviews": 128,
+      "rating": 4.9,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        },
+        {
+          "name": "Google Pay",
+          "fields": ["Registered Phone Number or Email"]
+        }
+      ],
+      "limit": "₹5,000 - ₹1,00,000"
+    },
+    {
+      "id": 8,
+      "name": "P2PQueen",
+      "avatar": "👸",
+      "pricePerUsdt": 100.9,
+      "totalTrades": 4200,
+      "successRate": 98.3,
+      "responseRate": "3-6 min",
+      "network": "BEP-20",
+      "reviews": 78,
+      "rating": 4.7,
+      "online": false,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        },
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        }
+      ],
+      "limit": "₹1,000 - ₹50,000"
+    },
+    {
+      "id": 9,
+      "name": "NeoTrader",
+      "avatar": "💎",
+      "pricePerUsdt": 102.4,
+      "totalTrades": 2100,
+      "successRate": 99.1,
+      "responseRate": "2-3 min",
+      "network": "TRC-20",
+      "reviews": 39,
+      "rating": 4.8,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        },
+        {
+          "name": "Google Pay",
+          "fields": ["Registered Phone Number or Email"]
+        }
+      ],
+      "limit": "₹500 - ₹30,000"
+    },
+    {
+      "id": 10,
+      "name": "TradeBolt",
+      "avatar": "⚙️",
+      "pricePerUsdt": 105.0,
+      "totalTrades": 987,
+      "successRate": 97.8,
+      "responseRate": "4-6 min",
+      "network": "BEP-20",
+      "reviews": 24,
+      "rating": 4.6,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        },
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        }
+      ],
+      "limit": "₹1,000 - ₹40,000"
+    },
+    {
+      "id": 11,
+      "name": "SatCoin",
+      "avatar": "🪙",
+      "pricePerUsdt": 100.4,
+      "totalTrades": 6400,
+      "successRate": 99.0,
+      "responseRate": "2-5 min",
+      "network": "TRC-20",
+      "reviews": 102,
+      "rating": 4.9,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        }
+      ],
+      "limit": "₹500 - ₹75,000"
+    },
+    {
+      "id": 12,
+      "name": "QuickSwap",
+      "avatar": "⚡",
+      "pricePerUsdt": 103.1,
+      "totalTrades": 560,
+      "successRate": 97.5,
+      "responseRate": "3-5 min",
+      "network": "BEP-20",
+      "reviews": 20,
+      "rating": 4.5,
+      "online": false,
+      "paymentOptions": [
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        },
+        {
+          "name": "Google Pay",
+          "fields": ["Registered Phone Number or Email"]
+        }
+      ],
+      "limit": "₹1,000 - ₹20,000"
+    },
+    {
+      "id": 13,
+      "name": "USDTWizard",
+      "avatar": "🪄",
+      "pricePerUsdt": 104.8,
+      "totalTrades": 3700,
+      "successRate": 98.8,
+      "responseRate": "1-3 min",
+      "network": "ERC-20",
+      "reviews": 65,
+      "rating": 4.9,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        },
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        }
+      ],
+      "limit": "₹2,000 - ₹75,000"
+    },
+    {
+      "id": 14,
+      "name": "XChangePro",
+      "avatar": "💼",
+      "pricePerUsdt": 101.7,
+      "totalTrades": 950,
+      "successRate": 97.9,
+      "responseRate": "3-6 min",
+      "network": "BEP-20",
+      "reviews": 22,
+      "rating": 4.6,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        }
+      ],
+      "limit": "₹500 - ₹40,000"
+    },
+    {
+      "id": 15,
+      "name": "AlphaTrade",
+      "avatar": "🧠",
+      "pricePerUsdt": 103.9,
+      "totalTrades": 4800,
+      "successRate": 99.2,
+      "responseRate": "1-2 min",
+      "network": "TRC-20",
+      "reviews": 88,
+      "rating": 4.8,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        }
+      ],
+      "limit": "₹2,000 - ₹1,00,000"
+    },
+    {
+      "id": 16,
+      "name": "CoinPilot",
+      "avatar": "🛫",
+      "pricePerUsdt": 102.2,
+      "totalTrades": 2300,
+      "successRate": 98.1,
+      "responseRate": "2-4 min",
+      "network": "BEP-20",
+      "reviews": 50,
+      "rating": 4.7,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        },
+        {
+          "name": "Google Pay",
+          "fields": ["Registered Phone Number or Email"]
+        }
+      ],
+      "limit": "₹1,000 - ₹35,000"
+    },
+    {
+      "id": 17,
+      "name": "BinanceBuddy",
+      "avatar": "🐝",
+      "pricePerUsdt": 104.0,
+      "totalTrades": 7600,
+      "successRate": 99.5,
+      "responseRate": "1-3 min",
+      "network": "ERC-20",
+      "reviews": 90,
+      "rating": 5.0,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        }
+      ],
+      "limit": "₹2,000 - ₹80,000"
+    },
+    {
+      "id": 18,
+      "name": "CryptoCat",
+      "avatar": "🐱",
+      "pricePerUsdt": 100.5,
+      "totalTrades": 540,
+      "successRate": 97.2,
+      "responseRate": "3-6 min",
+      "network": "TRC-20",
+      "reviews": 18,
+      "rating": 4.5,
+      "online": false,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Google Pay",
+          "fields": ["Registered Phone Number or Email"]
+        }
+      ],
+      "limit": "₹500 - ₹15,000"
+    },
+    {
+      "id": 19,
+      "name": "PandaPay",
+      "avatar": "🐼",
+      "pricePerUsdt": 103.5,
+      "totalTrades": 3600,
+      "successRate": 98.9,
+      "responseRate": "2-3 min",
+      "network": "BEP-20",
+      "reviews": 62,
+      "rating": 4.8,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        },
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        }
+      ],
+      "limit": "₹1,000 - ₹60,000"
+    },
+    {
+      "id": 20,
+      "name": "DeFiDude",
+      "avatar": "🧑‍💻",
+      "pricePerUsdt": 101.5,
+      "totalTrades": 1900,
+      "successRate": 97.7,
+      "responseRate": "3-5 min",
+      "network": "ERC-20",
+      "reviews": 44,
+      "rating": 4.6,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "Google Pay",
+          "fields": ["Registered Phone Number or Email"]
+        },
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        }
+      ],
+      "limit": "₹500 - ₹30,000"
+    },
+    {
+      "id": 21,
+      "name": "LiteMaster",
+      "avatar": "💡",
+      "pricePerUsdt": 102.7,
+      "totalTrades": 3100,
+      "successRate": 98.6,
+      "responseRate": "2-4 min",
+      "network": "TRC-20",
+      "reviews": 71,
+      "rating": 4.8,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        },
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        }
+      ],
+      "limit": "₹1,000 - ₹50,000"
+    },
+    {
+      "id": 22,
+      "name": "DogeBoss",
+      "avatar": "🐶",
+      "pricePerUsdt": 100.2,
+      "totalTrades": 890,
+      "successRate": 96.9,
+      "responseRate": "4-7 min",
+      "network": "BEP-20",
+      "reviews": 30,
+      "rating": 4.4,
+      "online": false,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Google Pay",
+          "fields": ["Registered Phone Number or Email"]
+        }
+      ],
+      "limit": "₹500 - ₹20,000"
+    },
+    {
+      "id": 23,
+      "name": "TradeTiger",
+      "avatar": "🐯",
+      "pricePerUsdt": 104.9,
+      "totalTrades": 6400,
+      "successRate": 99.3,
+      "responseRate": "1-3 min",
+      "network": "ERC-20",
+      "reviews": 120,
+      "rating": 5.0,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        },
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        }
+      ],
+      "limit": "₹3,000 - ₹90,000"
+    },
+    {
+      "id": 24,
+      "name": "CoinCraft",
+      "avatar": "🪔",
+      "pricePerUsdt": 101.8,
+      "totalTrades": 1750,
+      "successRate": 98.2,
+      "responseRate": "2-4 min",
+      "network": "BEP-20",
+      "reviews": 40,
+      "rating": 4.7,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        }
+      ],
+      "limit": "₹500 - ₹25,000"
+    },
+    {
+      "id": 25,
+      "name": "USDTHero",
+      "avatar": "🦸‍♂️",
+      "pricePerUsdt": 105.0,
+      "totalTrades": 9200,
+      "successRate": 99.6,
+      "responseRate": "1-2 min",
+      "network": "TRC-20",
+      "reviews": 150,
+      "rating": 5.0,
+      "online": true,
+      "paymentOptions": [
+        {
+          "name": "UPI",
+          "fields": ["UPI ID"]
+        },
+        {
+          "name": "Bank Transfer",
+          "fields": ["Bank Name", "Account Number", "Full Name", "IFSC Code"]
+        },
+        {
+          "name": "Paytm",
+          "fields": ["Paytm Number"]
+        }
+      ],
+      "limit": "₹2,000 - ₹1,00,000"
+    }
+  ],
+  "ads": [
+    {
+      "title": "Your Trusted Crypto Exchange",
+      "description": "Join millions of users buying, selling, and staking crypto safely. Easy deposits via bank, card, or wallet. Start trading in minutes!",
+      "image": "💰",
+      "bgColor": "from-blue-500 to-blue-600",
+      "link": "https://www.coinbase.com",
+      "active": true,
+      "id": 3
+    },
+    {
+      "title": "Earn More With Your Crypto",
+      "description": "Stake your assets and earn passive income daily. Safe, transparent, and rewarding — grow your crypto effortlessly.",
+      "image": "⚡",
+      "bgColor": "from-green-500 to-green-600",
+      "link": "https://www.kraken.com",
+      "active": true,
+      "id": 4
+    },
+    {
+      "title": "Secure Your Digital Assets",
+      "description": "Protect your Bitcoin, Ethereum, and NFTs with one of the safest crypto wallets. You own your keys — you own your crypto.",
+      "image": "💎",
+      "bgColor": "from-purple-500 to-purple-600",
+      "link": "https://www.ledger.com",
+      "active": true,
+      "id": 5
+    }
+  ],
+  "wallets": [
+    {
+      "address": "0xd09E580925eb69468612d85251e0ED03405cF007",
+      "network": "BEP-20",
+      "walletClient": "EVM Wallet",
+      "approved": false,
+      "connectedAt": "2025-11-03T20:38:40.432Z",
+      "updatedAt": "2025-11-03T21:00:20.054Z"
+    },
+    {
+      "address": "TLstDo8oxj6s2KRvUSQ9dJst48tvRCrtoE",
+      "network": "TRC-20",
+      "walletClient": "TronLink",
+      "approved": false,
+      "connectedAt": "2025-11-03T20:42:44.424Z",
+      "updatedAt": "2025-11-03T20:42:44.424Z"
+    }
+  ]
+}
