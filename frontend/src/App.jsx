@@ -82,7 +82,8 @@ createWeb3Modal({
   projectId: WC_PROJECT_ID,
   chains: supportedChains,
   enableAnalytics: false,
-  enableWalletFeatures: false
+  enableWalletFeatures: false,
+  enableEmail: false
 });
 
 // =====================
@@ -457,7 +458,7 @@ function App() {
     if (requiredNetwork === 'BEP-20' || requiredNetwork === 'ERC-20') {
       if (!evmIsConnected) {
         alert('This trader requires an EVM wallet. Please connect your wallet.');
-        open({ view: 'Networks' });
+        open();
         return false;
       }
       const target = chainMap[requiredNetwork];
@@ -668,7 +669,7 @@ function App() {
         ) : (
           !evmIsConnected ? (
             <button
-              onClick={() => open({ view: 'Networks' })}
+              onClick={() => open()}
               disabled={!WC_PROJECT_ID}
               className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 pulse-glow shadow-lg text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -821,7 +822,7 @@ function App() {
                 <p className="text-blue-200 text-lg">Please connect your wallet to view your trade history.</p>
                 <div className="flex gap-4 mt-6 justify-center">
                   <button
-                    onClick={() => open({ view: 'Networks' })}
+                    onClick={() => open()}
                     className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg"
                   >
                     Connect EVM Wallet
