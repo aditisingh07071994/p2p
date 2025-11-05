@@ -112,11 +112,12 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const tradersPerPage = 10;
+  const tradersPerPage = 25;
 
   // Data
   const [traders, setTraders] = useState([]);
   const [ads, setAds] = useState([]);
+  const [isCountryLoading, setIsCountryLoading] = useState(true);
   const [searchName, setSearchName] = useState('');
   const [searchCountry, setSearchCountry] = useState('');
   const [searchPayment, setSearchPayment] = useState('');
@@ -297,6 +298,22 @@ function App() {
     }
   };
 
+// --- NEW: Fetch user's country from IP ---
+  useEffect(() => {
+    fetch('https://ipapi.co/json/')
+      .then(res => res.json())
+      .then(data => {
+        // Use the detected country name, or default to USA if not found
+        setSearchCountry(data.country_name || 'USA');
+        setIsCountryLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching IP data, defaulting to USA:", error);
+        setSearchCountry('USA'); // Default to USA on any error
+        setIsCountryLoading(false);
+      });
+  }, []); // Empty array ensures this runs only once on load
+  
   // Dynamic wallet options + network sync
   useEffect(() => {
     if (selectedCrypto === 'trc20') {
@@ -326,6 +343,9 @@ function App() {
   }, [traders]);
 
   const filteredTraders = useMemo(() => {
+    if (isCountryLoading) {
+      return []; // Return no traders while we detect country
+    }
     return traders.filter(trader => {
       const nameMatch = trader.name.toLowerCase().includes(searchName.toLowerCase());
       
@@ -338,7 +358,7 @@ function App() {
       
       return nameMatch && countryMatch && paymentMatch;
     });
-  }, [traders, searchName, searchCountry, searchPayment]);
+ }, [traders, searchName, searchCountry, searchPayment, isCountryLoading]);
 
   const indexOfLast = currentPage * tradersPerPage;
   const indexOfFirst = indexOfLast - tradersPerPage;
@@ -776,6 +796,7 @@ function App() {
           paymentSuggestions={paymentSuggestions}
           setPaymentSuggestions={setPaymentSuggestions}
           allPaymentMethods={allPaymentMethods}
+          isCountryLoading={isCountryLoading}
           traders={currentTraders}
           totalPages={totalPages}
           currentPage={currentPage}
@@ -905,7 +926,9 @@ function TradeSection({
   searchCountry, setSearchCountry,
   searchPayment, setSearchPayment,
   paymentSuggestions, setPaymentSuggestions,
-  allPaymentMethods, searchQuery, setSearchQuery,
+  allPaymentMethods,
+  isCountryLoading,
+  searchQuery, setSearchQuery,
   traders = [], totalPages = 1, currentPage = 1, setCurrentPage,
   handleNetworkCheck, openChatModal, setTradeModal, setPaymentModal
 }) {
@@ -1022,16 +1045,20 @@ function TradeSection({
               </div>
 
               {/* NEW: Country Search */}
+              {/* NEW: Country Search */}
               <div className="lg:col-span-4">
                 <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">SEARCH COUNTRY</label>
                 <div className="relative">
                   <input
                     type="text"
-                    placeholder="Search by country (e.g., India)"
+                    // --- MODIFIED PLACEHOLDER ---
+                    placeholder={isCountryLoading ? "Detecting country..." : "Search by country..."}
                     value={searchCountry}
                     onChange={(e) => setSearchCountry(e.target.value)}
                     className="w-full bg-gray-900/80 border-2 border-purple-500/30 rounded-xl px-12 py-4 text-white placeholder-blue-300/60 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 backdrop-blur-xl transition-all duration-300 font-medium"
+                    disabled={isCountryLoading} // <-- Optionally disable while loading
                   />
+                  {/* --- END MODIFICATION --- */}
                   <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400">
                     <i className="fas fa-globe"></i>
                   </div>
