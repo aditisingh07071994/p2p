@@ -1009,7 +1009,7 @@ function TradeSection({
               </div>
 
               {/* Secure Wallet */}
-              <div className="lg:col-span-3">
+              {/* <div className="lg:col-span-3">
                 <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">SECURE WALLET</label>
                 <div className="relative">
                   <select
@@ -1025,10 +1025,10 @@ function TradeSection({
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Trader Name Search */}
-              <div className="lg:col-span-6">
+              {/* <div className="lg:col-span-6">
                 <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">SEARCH TRADER NAME</label>
                 <div className="relative">
                   <input
@@ -1042,7 +1042,7 @@ function TradeSection({
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* NEW: Country Search */}
               {/* NEW: Country Search */}
@@ -1113,7 +1113,7 @@ function TradeSection({
           {/* Status Bar */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-blue-500/20">
             <div className="text-center">
-              <div className="text-white font-bold text-lg">{safeTraders.length}</div>
+              <div className="text-white font-bold text-lg">200+</div>
               <div className="text-cyan-300 text-xs uppercase tracking-wider">Active Targets</div>
             </div>
             <div className="text-center">
@@ -1132,7 +1132,6 @@ function TradeSection({
         </div>
 
         {/* NEW: Rotating Sponsored Ads Carousel */}
-        {/* NEW: Rotating Sponsored Ads Carousel */}
         {safeAds.length > 0 && (
           <div className="mb-8 slide-in">
             <h2 className="text-xl font-bold text-white mb-4 uppercase tracking-wider">Sponsored</h2>
@@ -1148,11 +1147,11 @@ function TradeSection({
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl md:text-3xl font-black text-white">
-              ACTIVE <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">OPERATORS</span>
+              ACTIVE <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Traders</span>
             </h2>
-            <div className="text-blue-300 text-sm font-semibold">
+            {/* <div className="text-blue-300 text-sm font-semibold">
               {safeTraders.length} UNITS DEPLOYED
-            </div>
+            </div> */}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
@@ -1544,12 +1543,12 @@ const PlaceholderSection = ({ title }) => (
 // Trader Card
 function TraderCard({ trader, handleNetworkCheck, handleChatOpen, setTradeModal }) {
     // Add this debug log
-  console.log('Trader data:', {
-    name: trader.name,
-    currencySymbol: trader.currencySymbol,
-    pricePerUsdt: trader.pricePerUsdt,
-    country: trader.country
-  });
+  // console.log('Trader data:', {
+  //   name: trader.name,
+  //   currencySymbol: trader.currencySymbol,
+  //   pricePerUsdt: trader.pricePerUsdt,
+  //   country: trader.country
+  // });
   const handleTradeNowClick = () => {
     const ok = handleNetworkCheck(trader.network);
     if (ok) setTradeModal({ trader });
