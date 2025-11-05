@@ -384,8 +384,8 @@ function AdminPanel() {
     limit: '', online: true
   });
   const [newAd, setNewAd] = useState({
-    title: '', description: '', image: '🎯', bgColor: 'from-blue-500 to-blue-600', link: '#', active: true
-  });
+    title: '', description: '', image: 'https://placehold.co/64x64/334155/E2E8F0?text=Logo', bgColor: 'from-blue-500 to-blue-600', link: '#', active: true
+  });
 
   // Check token on initial load
   useEffect(() => {
@@ -1363,19 +1363,13 @@ const AdManagementPanel = ({ ads, newAd, setNewAd, addNewAd, deleteAd, toggleAdS
               icon="fas fa-align-left"
             />
           </div>
-          <FormSelect 
-            label="Icon" 
-            value={newAd.image} 
-            onChange={e => setNewAd({...newAd, image: e.target.value})}
-            icon="fas fa-icons"
-          >
-            <option value="🎯">🎯 Target</option>
-            <option value="💰">💰 Money</option>
-            <option value="⚡">⚡ Flash</option>
-            <option value="🔥">🔥 Fire</option>
-            <option value="💎">💎 Diamond</option>
-            <option value="🚀">🚀 Rocket</option>
-          </FormSelect>
+          <FormInput 
+            label="Logo Image URL"
+            value={newAd.image}
+            onChange={e => setNewAd({...newAd, image: e.target.value})}
+            placeholder="https://example.com/logo.png"
+            icon="fas fa-image"
+          />
           <FormSelect 
             label="Background"
             value={newAd.bgColor} 

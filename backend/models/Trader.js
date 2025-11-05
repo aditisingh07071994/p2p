@@ -7,6 +7,8 @@ const TraderSchema = new mongoose.Schema({
   name: String,
   avatar: String,
   country: String,
+  currency: String,
+  currencySymbol: String,
   pricePerUsdt: Number,
   totalTrades: Number,
   successRate: Number,

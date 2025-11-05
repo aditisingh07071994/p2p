@@ -117,7 +117,6 @@ function App() {
   // Data
   const [traders, setTraders] = useState([]);
   const [ads, setAds] = useState([]);
-  const [currentAd, setCurrentAd] = useState(0);
   const [searchName, setSearchName] = useState('');
   const [searchCountry, setSearchCountry] = useState('');
   const [searchPayment, setSearchPayment] = useState('');
@@ -262,13 +261,6 @@ function App() {
       .then(data => setAds(data.filter(ad => ad.active)))
       .catch(err => console.error('Failed to fetch ads:', err));
   }, []);
-
-  // Ads rotator
-  useEffect(() => {
-    if (!ads?.length) return;
-    const t = setInterval(() => setCurrentAd(p => (p + 1) % ads.length), 5000);
-    return () => clearInterval(t);
-  }, [ads]);
 
   // Safety modal once/day when user visits trade
   useEffect(() => {
@@ -770,7 +762,6 @@ function App() {
       {activeSection === 'trade' && (
         <TradeSection
           ads={ads}
-          currentAd={currentAd}
           selectedCrypto={selectedCrypto}
           setSelectedCrypto={setSelectedCrypto}
           selectedWallet={selectedWallet}
@@ -906,7 +897,7 @@ function App() {
 }
 
 function TradeSection({
-  ads = [], currentAd = 0,
+  ads = [],
   selectedCrypto, setSelectedCrypto,
   selectedWallet, setSelectedWallet,
   walletOptions = [],
@@ -1101,41 +1092,17 @@ function TradeSection({
           </div>
         </div>
 
-        {/* Strategic Ads Deployment */}
-        {safeAds.length > 0 && (
-          <div className="mb-8 slide-in">
-            <div className={`bg-gradient-to-r ${safeAds[currentAd]?.bgColor || 'from-yellow-400 to-orange-500'} rounded-2xl p-6 text-center relative overflow-hidden shadow-2xl border border-white/20 military-ad`}>
-              <div className="absolute top-4 right-4">
-                <span className="bg-black/40 text-yellow-300 text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm border border-yellow-400/30 uppercase tracking-wide">Tactical Alert</span>
-              </div>
-              <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-6">
-                <div className="text-5xl transform hover:scale-110 transition-transform duration-300">
-                  {safeAds[currentAd]?.image || '🎯'}
-                </div>
-                <div className="text-center md:text-left">
-                  <h3 className="text-xl font-black text-gray-900 mb-2 tracking-wide">
-                    {safeAds[currentAd]?.title || 'Strategic Opportunity'}
-                  </h3>
-                  <p className="text-gray-800 text-base font-medium leading-relaxed">
-                    {safeAds[currentAd]?.description || 'Enhanced trading conditions activated'}
-                  </p>
-                </div>
-              </div>
-              <div className="flex justify-center space-x-2 mt-6">
-                {safeAds.map((_, index) => (
-                  <button
-                    key={index}
-                    className={`w-3 h-3 rounded-full transition-all ${
-                      index === currentAd 
-                        ? 'bg-gray-900 scale-125 shadow-lg' 
-                        : 'bg-gray-600 hover:bg-gray-700'
-                    }`}
-                  />
+        {/* NEW: Professional Sponsored Ads Section */}
+          {safeAds.length > 0 && (
+            <div className="mb-8 slide-in">
+              <h2 className="text-xl font-bold text-white mb-4 uppercase tracking-wider">Sponsored</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {safeAds.map((ad) => (
+                  <AdCard key={ad.id} ad={ad} />
                 ))}
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Tactical Trader Grid */}
         <div className="mb-8">
@@ -1576,10 +1543,22 @@ function TraderCard({ trader, handleNetworkCheck, handleChatOpen, setTradeModal 
       </div>
 
       <div className="gradient-border p-3 md:p-4 mb-4 text-center">
-        <div className="text-xl md:text-2xl font-bold text-white">₹{trader.pricePerUsdt}</div>
+        <div className="text-xl md:text-2xl font-bold text-white">
+          {trader.currencySymbol}{trader.pricePerUsdt.toFixed(2)}
+        </div>
         <div className="text-blue-200 text-xs md:text-sm">per USDT</div>
       </div>
 
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        <div>
+          <div className="text-blue-200 text-xs md:text-sm mb-1">Country:</div>
+          <div className="flex flex-wrap gap-1">
+            <span className="bg-purple-500/20 text-purple-300 px-2 py-1 rounded-lg text-xs backdrop-blur-sm truncate">
+              <i className="fas fa-globe-asia mr-1"></i>
+              {trader.country}
+            </span>
+          </div>
+        </div>
       <div className="mb-4">
         <div className="text-blue-200 text-xs md:text-sm mb-2">Network:</div>
         <div className="flex flex-wrap gap-1">
@@ -1601,8 +1580,9 @@ function TraderCard({ trader, handleNetworkCheck, handleChatOpen, setTradeModal 
           )}
         </div>
       </div>
+      </div>
 
-      <div className="flex space-x-2">
+      <div className="flex space-x-2 mt-auto">
         <button
           onClick={handleTradeNowClick}
           className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all text-sm md:text-base shadow-lg"
@@ -2301,3 +2281,55 @@ const FormInput = ({ label, name, icon, ...props }) => (
     />
   </div>
 );
+
+function AdCard({ ad }) {
+  // Simple URL formatter to show a clean domain
+  const getHostname = (url) => {
+    try {
+      return new URL(url).hostname;
+    } catch (e) {
+      return url;
+    }
+  };
+
+  return (
+    <a
+      href={ad.link}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      className="glass-military p-4 rounded-2xl border border-purple-500/30 shadow-lg hover:shadow-purple-500/20 hover:border-purple-400 transition-all duration-300 flex space-x-4 relative overflow-hidden group"
+    >
+      {/* "Ad" Label */}
+      <span className="absolute top-2 right-2 bg-black/30 text-white/50 text-xs font-bold px-2 py-0.5 rounded-full backdrop-blur-sm">
+        Ad
+      </span>
+      
+      {/* Brand Logo */}
+      <div className="flex-shrink-0 w-16 h-16 bg-white/10 rounded-xl flex items-center justify-center border border-white/10">
+        <img
+          src={ad.image}
+          alt={`${ad.title} logo`}
+          className="w-12 h-12 object-contain"
+          // Fallback in case image fails to load
+          onError={(e) => {
+            e.target.onerror = null; 
+            e.target.src = 'https://placehold.co/64x64/334155/E2E8F0?text=Logo';
+          }}
+        />
+      </div>
+
+      {/* Ad Content */}
+      <div className="flex-1 min-w-0">
+        <h3 className="font-bold text-white text-lg truncate group-hover:text-cyan-400 transition-colors">
+          {ad.title}
+        </h3>
+        <p className="text-blue-200 text-sm mt-1 line-clamp-2">
+          {ad.description}
+        </p>
+        <p className="text-cyan-400 text-xs font-medium mt-2 truncate">
+          {getHostname(ad.link)}
+        </p>
+      </div>
+    </a>
+  );
+}
