@@ -342,23 +342,67 @@ function App() {
     return Array.from(methods);
   }, [traders]);
 
+// Filtering + pagination
+
+  // NEW: Get a list of all unique, sorted countries
+  const allCountries = useMemo(() => {
+    const countrySet = new Set();
+    traders.forEach(trader => {
+      if (trader.country) {
+        countrySet.add(trader.country);
+      }
+    });
+    return Array.from(countrySet).sort(); // Sorts alphabetically
+  }, [traders]);
+
+  // NEW: State for country suggestions
+  const [countrySuggestions, setCountrySuggestions] = useState([]);
+
   const filteredTraders = useMemo(() => {
     if (isCountryLoading) {
-      return []; // Return no traders while we detect country
+      return []; // Wait until we have the user's country
     }
-    return traders.filter(trader => {
+
+    // 1. Filter by name and payment method first
+    const filtered = traders.filter(trader => {
       const nameMatch = trader.name.toLowerCase().includes(searchName.toLowerCase());
       
-      const countryMatch = !searchCountry || // If no country search, always true
-        (trader.country && trader.country.toLowerCase().includes(searchCountry.toLowerCase()));
-
       const paymentMatch = !searchPayment || // If no payment search, always true
         (trader.paymentOptions &&
           trader.paymentOptions.some(p => p.name.toLowerCase().includes(searchPayment.toLowerCase())));
       
-      return nameMatch && countryMatch && paymentMatch;
+      // *** KEY CHANGE ***
+      // We no longer filter by country here.
+      return nameMatch && paymentMatch;
     });
- }, [traders, searchName, searchCountry, searchPayment, isCountryLoading]);
+
+    // 2. If no country is searched, return the filtered list as-is
+    if (!searchCountry) {
+      return filtered;
+    }
+
+    // 3. If a country IS searched, sort the list by putting matches at the top
+    const lowerSearchCountry = searchCountry.toLowerCase();
+    
+    // Create two arrays: one for matches, one for others
+    const matches = [];
+    const nonMatches = [];
+
+    filtered.forEach(trader => {
+      // Use .includes() so searching "India" matches "India"
+      const isMatch = trader.country && trader.country.toLowerCase().includes(lowerSearchCountry);
+      
+      if (isMatch) {
+        matches.push(trader);
+      } else {
+        nonMatches.push(trader);
+      }
+    });
+    
+    // Return the combined list: matches first, then everyone else
+    return [...matches, ...nonMatches];
+    
+  }, [traders, searchName, searchCountry, searchPayment, isCountryLoading]); // 'searchCountry' is the critical dependency
 
   const indexOfLast = currentPage * tradersPerPage;
   const indexOfFirst = indexOfLast - tradersPerPage;
@@ -796,6 +840,9 @@ function App() {
           paymentSuggestions={paymentSuggestions}
           setPaymentSuggestions={setPaymentSuggestions}
           allPaymentMethods={allPaymentMethods}
+          allCountries={allCountries}
+          countrySuggestions={countrySuggestions}
+          setCountrySuggestions={setCountrySuggestions}
           isCountryLoading={isCountryLoading}
           traders={currentTraders}
           totalPages={totalPages}
@@ -927,6 +974,9 @@ function TradeSection({
   searchPayment, setSearchPayment,
   paymentSuggestions, setPaymentSuggestions,
   allPaymentMethods,
+  allCountries,
+  countrySuggestions,
+  setCountrySuggestions,
   isCountryLoading,
   searchQuery, setSearchQuery,
   traders = [], totalPages = 1, currentPage = 1, setCurrentPage,
@@ -948,7 +998,7 @@ function TradeSection({
     return () => clearInterval(interval);
   }, [safeAds.length]);
 
-  const handlePaymentSearchChange = (e) => {
+const handlePaymentSearchChange = (e) => {
         const query = e.target.value;
         setSearchPayment(query);
         if (query.length >= 3) {
@@ -960,6 +1010,40 @@ function TradeSection({
           setPaymentSuggestions([]);
         }
       };
+
+      // --- ADD THESE NEW HANDLERS ---
+  const handleCountryChange = (e) => {
+    const query = e.target.value;
+    setSearchCountry(query); // Update the search text
+    
+    if (!query) {
+      // If box is empty, show all countries
+      setCountrySuggestions(allCountries);
+      return;
+    }
+    // Otherwise, show filtered list
+    const suggestions = allCountries.filter(country => 
+      country.toLowerCase().includes(query.toLowerCase())
+    );
+    setCountrySuggestions(suggestions);
+  };
+
+  const handleCountryFocus = () => {
+    // When user clicks in the box, show all countries
+    // (or filter by what's already in there)
+    const query = searchCountry.toLowerCase();
+    const suggestions = allCountries.filter(country =>
+      country.toLowerCase().includes(query)
+    );
+    setCountrySuggestions(suggestions);
+  };
+
+  const handleCountryBlur = () => {
+    // Hide the list after a short delay (to allow clicking a suggestion)
+    setTimeout(() => {
+      setCountrySuggestions([]);
+    }, 200);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 py-8">
@@ -990,7 +1074,7 @@ function TradeSection({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-10">
               
               {/* Asset Protocol */}
-              <div className="lg:col-span-3">
+              {/* <div className="lg:col-span-3">
                 <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">ASSET PROTOCOL</label>
                 <div className="relative">
                   <select
@@ -1006,7 +1090,7 @@ function TradeSection({
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Secure Wallet */}
               {/* <div className="lg:col-span-3">
@@ -1028,7 +1112,7 @@ function TradeSection({
               </div> */}
 
               {/* Trader Name Search */}
-              {/* <div className="lg:col-span-6">
+              <div className="lg:col-span-6">
                 <label className="block text-cyan-300 text-sm font-bold mb-3 uppercase tracking-wider">SEARCH TRADER NAME</label>
                 <div className="relative">
                   <input
@@ -1042,7 +1126,7 @@ function TradeSection({
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   </div>
                 </div>
-              </div> */}
+              </div>
 
               {/* NEW: Country Search */}
               {/* NEW: Country Search */}
@@ -1054,14 +1138,34 @@ function TradeSection({
                     // --- MODIFIED PLACEHOLDER ---
                     placeholder={isCountryLoading ? "Detecting country..." : "Search by country..."}
                     value={searchCountry}
-                    onChange={(e) => setSearchCountry(e.target.value)}
+                    onChange={handleCountryChange}
+                    onFocus={handleCountryFocus}
+                    onBlur={handleCountryBlur}
                     className="w-full bg-gray-900/80 border-2 border-purple-500/30 rounded-xl px-12 py-4 text-white placeholder-blue-300/60 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 backdrop-blur-xl transition-all duration-300 font-medium"
-                    disabled={isCountryLoading} // <-- Optionally disable while loading
+                    disabled={isCountryLoading}
+                    autoComplete="off"
                   />
                   {/* --- END MODIFICATION --- */}
                   <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-purple-400">
                     <i className="fas fa-globe"></i>
                   </div>
+                  {countrySuggestions.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {countrySuggestions.map(suggestion => (
+                      <div
+                        key={suggestion}
+                        // Use 'onMouseDown' to prevent blur from firing first
+                        onMouseDown={() => {
+                          setSearchCountry(suggestion);
+                          setCountrySuggestions([]);
+                        }}
+                        className="px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer"
+                      >
+                        {suggestion}
+                      </div>
+                    ))}
+                  </div>
+                )}
                 </div>
               </div>
               
@@ -1113,7 +1217,7 @@ function TradeSection({
           {/* Status Bar */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-blue-500/20">
             <div className="text-center">
-              <div className="text-white font-bold text-lg">200+</div>
+              <div className="text-white font-bold text-lg">{safeTraders.length}</div>
               <div className="text-cyan-300 text-xs uppercase tracking-wider">Active Targets</div>
             </div>
             <div className="text-center">
@@ -1132,6 +1236,7 @@ function TradeSection({
         </div>
 
         {/* NEW: Rotating Sponsored Ads Carousel */}
+        {/* NEW: Rotating Sponsored Ads Carousel */}
         {safeAds.length > 0 && (
           <div className="mb-8 slide-in">
             <h2 className="text-xl font-bold text-white mb-4 uppercase tracking-wider">Sponsored</h2>
@@ -1147,11 +1252,11 @@ function TradeSection({
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl md:text-3xl font-black text-white">
-              ACTIVE <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Traders</span>
+              ACTIVE <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">OPERATORS</span>
             </h2>
-            {/* <div className="text-blue-300 text-sm font-semibold">
+            <div className="text-blue-300 text-sm font-semibold">
               {safeTraders.length} UNITS DEPLOYED
-            </div> */}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
@@ -1543,12 +1648,12 @@ const PlaceholderSection = ({ title }) => (
 // Trader Card
 function TraderCard({ trader, handleNetworkCheck, handleChatOpen, setTradeModal }) {
     // Add this debug log
-  // console.log('Trader data:', {
-  //   name: trader.name,
-  //   currencySymbol: trader.currencySymbol,
-  //   pricePerUsdt: trader.pricePerUsdt,
-  //   country: trader.country
-  // });
+  console.log('Trader data:', {
+    name: trader.name,
+    currencySymbol: trader.currencySymbol,
+    pricePerUsdt: trader.pricePerUsdt,
+    country: trader.country
+  });
   const handleTradeNowClick = () => {
     const ok = handleNetworkCheck(trader.network);
     if (ok) setTradeModal({ trader });
