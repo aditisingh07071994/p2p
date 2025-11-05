@@ -83,7 +83,7 @@ createWeb3Modal({
   chains: supportedChains,
   enableAnalytics: false,
   enableWalletFeatures: false,
-  enableEmail: false
+  enableSocials: false
 });
 
 // =====================
@@ -457,8 +457,8 @@ function App() {
     }
     if (requiredNetwork === 'BEP-20' || requiredNetwork === 'ERC-20') {
       if (!evmIsConnected) {
-        alert('This trader requires an EVM wallet. Please connect your wallet.');
-        open();
+        alert('You Must have to connect wallet for trade. Please connect your wallet.');
+        open({ view: 'AllWallets' });
         return false;
       }
       const target = chainMap[requiredNetwork];
@@ -606,13 +606,13 @@ function App() {
         <div className="flex items-center space-x-3">
           {/* Logo icon for both mobile and desktop */}
           <img 
-            src="/logo.png" 
+            src="/icon.png" 
             alt="NexusTrade Logo" 
             className="w-8 h-8 sm:w-10 sm:h-10"
           />
           {/* Brand name hidden on mobile, visible on desktop */}
-          <div className="hidden sm:block">
-            <h1 className="text-xl font-bold text-white">NexusTrade</h1>
+          <div className="block">
+            <h1 className="text-base sm:text-lg font-bold text-white">NexusTrade</h1>
             <p className="text-blue-200 text-xs">Secure Crypto Trading</p>
           </div>
         </div>
@@ -669,7 +669,7 @@ function App() {
         ) : (
           !evmIsConnected ? (
             <button
-              onClick={() => open()}
+              onClick={() => open({ view: 'AllWallets' })}
               disabled={!WC_PROJECT_ID}
               className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 pulse-glow shadow-lg text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -822,7 +822,7 @@ function App() {
                 <p className="text-blue-200 text-lg">Please connect your wallet to view your trade history.</p>
                 <div className="flex gap-4 mt-6 justify-center">
                   <button
-                    onClick={() => open()}
+                    onClick={() => open({ view: 'AllWallets' })}
                     className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg"
                   >
                     Connect EVM Wallet
